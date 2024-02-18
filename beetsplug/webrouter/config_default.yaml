@@ -1,0 +1,10 @@
+host: "127.0.0.1"
+port: 8337
+cors: ""
+cors_supports_credentials: false
+reverse_proxy: false
+include_paths: false
+readonly: true
+routes:
+  /:
+    plugin: web

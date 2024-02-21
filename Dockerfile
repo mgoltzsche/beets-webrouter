@@ -10,7 +10,7 @@ RUN set -eux; \
 	rm -rf /tmp/bats-core-$BATS_VERSION
 
 # Install beets-webrouter plugin from source
-RUN python -m pip install beetstream==1.2.0 beets-webm3u==0.1.0
+RUN python -m pip install beetstream==1.2.0 beets-webm3u==0.1.1
 COPY dist /plugin/dist
 RUN python -m pip install /plugin/dist/*
 COPY example_beets_config.yaml /etc/beets/default-config.yaml

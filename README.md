@@ -10,6 +10,11 @@ This allows serve the beets web UI, a Subsonic API as well as the generated M3U 
 python3 -m pip install beets-webrouter
 ```
 
+To install the plugins that are used by the example configuration below, run:
+```sh
+python3 -m pip install beets-beetstream beets-webm3u
+```
+
 ## Configuration
 
 Enable the plugin and add a `webrouter` section to your beets `config.yaml` as follows:
@@ -23,6 +28,8 @@ plugins:
   - smartplaylist
 
 webrouter:
+  host: 127.0.0.1
+  port: 8337
   routes:
     /:
       plugin: web
@@ -56,7 +63,7 @@ Once the `webrouter` plugin is enabled within your beets configuration, you can 
 beet webrouter
 ```
 
-Once the server started, you can browse [`http://localhost:8337`](http://localhost:8337).
+You browse the server at [`http://localhost:8337`](http://localhost:8337).
 
 ### CLI
 

@@ -12,7 +12,7 @@ python3 -m pip install beets-webrouter
 
 To install the plugins that are used by the example configuration below, run:
 ```sh
-python3 -m pip install beets-beetstream beets-webm3u
+python3 -m pip install beetstream beets-webm3u
 ```
 
 ## Configuration
@@ -28,7 +28,7 @@ plugins:
   - smartplaylist
 
 webrouter:
-  host: 127.0.0.1
+  host: 0.0.0.0
   port: 8337
   routes:
     /:
@@ -46,14 +46,10 @@ webrouter:
 aura:
   page_limit: 100
 
-smartplaylist:
-  auto: false
-  output: m3u
+webm3u:
+  host: 0.0.0.0
+  port: 8339
   playlist_dir: /data/playlists
-  relative_to: /data/playlists
-  playlists:
-  - name: all.m3u
-    query: ''
 ```
 
 ## Usage

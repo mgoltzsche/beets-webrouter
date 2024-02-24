@@ -90,3 +90,8 @@ make beets-sh
 
 A temporary beets library is written to `./data`.
 It can be removed by calling `make clean-data`.
+
+To just start the server, run:
+```sh
+make beets-webrouter
+```

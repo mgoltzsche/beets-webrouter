@@ -3,7 +3,7 @@ import mediafile
 import os
 import re
 import importlib
-from flask import Flask
+from flask import Flask, send_file, abort
 from beets.plugins import BeetsPlugin
 from beets.ui import Subcommand, decargs
 from beets import config
@@ -56,6 +56,12 @@ class WebRouterPlugin(BeetsPlugin):
 
         for e in blueprint_routes:
             app.register_blueprint(e['blueprint'], url_prefix=e['prefix'])
+
+        icon = self.config['favicon'].get()
+        if icon:
+            @app.route('/favicon.ico')
+            def favicon():
+                return send_file(icon, mimetype='image/x-icon')
 
         app.wsgi_app = DispatcherMiddleware(app.wsgi_app, routes)
 

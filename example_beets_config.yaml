@@ -15,6 +15,7 @@ plugins:
   - smartplaylist
 
 webrouter:
+  favicon: /favicon.ico
   routes:
     /:
       plugin: web

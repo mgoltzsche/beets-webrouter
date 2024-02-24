@@ -5,6 +5,7 @@ cors_supports_credentials: false
 reverse_proxy: false
 include_paths: false
 readonly: true
+favicon: ""
 routes:
   /:
     plugin: web

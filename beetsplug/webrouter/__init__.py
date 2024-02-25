@@ -3,7 +3,7 @@ import mediafile
 import os
 import re
 import importlib
-from flask import Flask, send_file, abort
+from flask import Flask
 from beets.plugins import BeetsPlugin
 from beets.ui import Subcommand, decargs
 from beets import config
@@ -37,14 +37,14 @@ class WebRouterPlugin(BeetsPlugin):
         for k,v in self.config['routes'].items():
             plugin = v['plugin'].get()
             if plugin:
-                mod = importlib.import_module('beetsplug.{}'.format(plugin))
+                mod = importlib.import_module(f'beetsplug.{plugin}')
+                has_create_app = hasattr(mod, 'create_app')
+                has_app = hasattr(mod, 'app')
                 if 'blueprint' in v and v['blueprint'].get():
-                    blueprint_routes.append({
-                        'prefix': k,
-                        'blueprint': getattr(mod, v['blueprint'].get()),
-                    })
-                else:
-                    if hasattr(mod, 'create_app'):
+                    blueprint_routes.append(BlueprintRoute(k,
+                        getattr(mod, v['blueprint'].get())))
+                elif has_app or has_create_app:
+                    if has_create_app:
                         modapp = mod.create_app()
                     else:
                         modapp = mod.app
@@ -53,15 +53,13 @@ class WebRouterPlugin(BeetsPlugin):
                         app = modapp
                     else:
                         routes[k] = modapp
+                elif hasattr(mod, 'bp'):
+                    blueprint_routes.append(BlueprintRoute(k, getattr(mod, 'bp')))
+                else:
+                    raise Exception(f"webrouter: cannot register route to plugin '{plugin}' since it neither specifies a 'create_app' function, a Flask app 'app' nor a Blueprint 'bp' nor is a Blueprint name configured!")
 
-        for e in blueprint_routes:
-            app.register_blueprint(e['blueprint'], url_prefix=e['prefix'])
-
-        icon = self.config['favicon'].get()
-        if icon:
-            @app.route('/favicon.ico')
-            def favicon():
-                return send_file(icon, mimetype='image/x-icon')
+        for r in blueprint_routes:
+            app.register_blueprint(r.blueprint, url_prefix=r.url_prefix)
 
         app.wsgi_app = DispatcherMiddleware(app.wsgi_app, routes)
 
@@ -96,3 +94,8 @@ class WebRouterPlugin(BeetsPlugin):
 
         if self.config['reverse_proxy']:
             app.wsgi_app = ReverseProxied(app.wsgi_app)
+
+class BlueprintRoute:
+    def __init__(self, url_prefix, blueprint):
+        self.url_prefix = url_prefix
+        self.blueprint = blueprint

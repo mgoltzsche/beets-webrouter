@@ -1,2 +1,3 @@
 include README.md
 include beetsplug/webrouter/config_default.yaml
+include beetsplug/webrouter/static/favicon.ico

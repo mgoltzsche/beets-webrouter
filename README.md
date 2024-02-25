@@ -33,6 +33,8 @@ webrouter:
   routes:
     /:
       plugin: web
+    /favicon.ico:
+      plugin: webrouter.favicon
     /subsonic:
       plugin: beetstream
       config:

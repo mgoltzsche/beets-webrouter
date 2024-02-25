@@ -15,10 +15,11 @@ plugins:
   - smartplaylist
 
 webrouter:
-  favicon: /favicon.ico
   routes:
     /:
       plugin: web
+    /favicon.ico:
+      plugin: webrouter.favicon
     /subsonic:
       plugin: beetstream
       config:

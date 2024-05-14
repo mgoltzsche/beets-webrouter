@@ -92,7 +92,7 @@ class WebRouterPlugin(BeetsPlugin):
         for k,v in cfg:
             app.config[k] = v.get()
 
-        if self.config['reverse_proxy']:
+        if self.config['reverse_proxy'] or os.getenv('BEETS_WEBROUTER_REVERSE_PROXY') == 'true':
             app.wsgi_app = ReverseProxied(app.wsgi_app)
 
 class BlueprintRoute:

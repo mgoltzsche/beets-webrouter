@@ -7,7 +7,7 @@ setuptools.setup(
     name='beets-webrouter',
     version='0.0.0-dev',
     author='Max Goltzsche',
-    description='Serve multiple beets APIs on the same host/port',
+    description='Serve multiple beets APIs on the same IP/port using a single command',
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/mgoltzsche/beets-webrouter',

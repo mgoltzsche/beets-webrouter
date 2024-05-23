@@ -1,8 +1,8 @@
 # beets-webrouter
 
-A [beets](https://github.com/beetbox/beets) plugin to serve multiple web apps on the same server/host/port with one command.
+A [beets](https://github.com/beetbox/beets) plugin to serve multiple web apps on the same server/host/port using a single command.
 
-This allows serve the beets web UI, a Subsonic API as well as the generated M3U playlists with a single `beets webrouter` command.
+By running `beet webrouter` you can serve e.g. the beets web UI, a Subsonic API as well as the generated M3U playlists on the same host/port, each under a different path.
 
 ## Installation
 

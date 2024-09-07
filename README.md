@@ -1,13 +1,13 @@
 # beets-webrouter
 
-A [beets](https://github.com/beetbox/beets) plugin to serve multiple web apps on the same server/host/port using a single command.
+A [beets](https://github.com/beetbox/beets) plugin to serve multiple [Flask](https://github.com/pallets/flask) or [FastAPI](https://github.com/fastapi/fastapi) based beets web apps on the same server/host/port using a single command.
 
 By running `beet webrouter` you can serve e.g. the beets web UI, a Subsonic API as well as the generated M3U playlists on the same host/port, each under a different path.
 
 ## Installation
 
 ```sh
-python3 -m pip install beets-webrouter
+python3 -m pip install beets-webrouter fastapi flask uvicorn
 ```
 
 To install the plugins that are used by the example configuration below, run:

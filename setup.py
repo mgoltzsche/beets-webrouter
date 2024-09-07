@@ -20,5 +20,8 @@ setuptools.setup(
     ],
     install_requires=[
         'beets',
+        'fastapi',
+        'flask',
+        'uvicorn',
     ]
 )

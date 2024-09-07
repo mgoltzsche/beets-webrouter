@@ -9,6 +9,10 @@ RUN set -eux; \
 	ln -s /opt/bats/bin/bats /usr/local/bin/bats; \
 	rm -rf /tmp/bats-core-$BATS_VERSION
 
+RUN python3 -m pip install \
+	uvicorn==0.30.3 \
+	fastapi==0.111.1
+
 # Install beets-webrouter plugin from source
 COPY dist /plugin/dist
 RUN python -m pip install /plugin/dist/*

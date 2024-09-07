@@ -3,6 +3,7 @@ import mediafile
 import os
 import re
 import importlib
+from contextlib import AsyncExitStack, asynccontextmanager
 from flask import Flask
 from beets.plugins import BeetsPlugin
 from beets.ui import Subcommand, decargs
@@ -13,6 +14,9 @@ from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from werkzeug.exceptions import NotFound
 from beetsplug.web import ReverseProxied
 from flask import Blueprint
+from fastapi import FastAPI
+from starlette.routing import Mount
+from fastapi.middleware.wsgi import WSGIMiddleware
 
 
 class WebRouterPlugin(BeetsPlugin):
@@ -30,8 +34,15 @@ class WebRouterPlugin(BeetsPlugin):
         return [c]
 
     def _run_cmd(self, lib, opts, args):
-        app = Flask(__name__)
+        app = FastAPI(
+            title=__name__,
+            description="Serves multiple Beets webapps",
+            version="1.0.0",
+        )
+        flask_app = None
+
         routes = {}
+        flask_routes = {}
         blueprint_routes = []
 
         for k,v in self.config['routes'].items():
@@ -48,29 +59,67 @@ class WebRouterPlugin(BeetsPlugin):
                         modapp = mod.create_app()
                     else:
                         modapp = mod.app
-                    self._configure_app(modapp, v['config'].items(), lib)
-                    if k == '/':
-                        app = modapp
+
+                    if isinstance(modapp, FastAPI):
+                        self._configure_fastapi_app(modapp, v['config'].items(), lib)
                     else:
-                        routes[k] = modapp
+                        self._configure_flask_app(modapp, v['config'].items(), lib)
+
+                    if k == '/':
+                        if isinstance(modapp, FastAPI):
+                            app = modapp
+                        else:
+                            flask_app = modapp
+                    else:
+                        if isinstance(modapp, FastAPI):
+                            routes[k] = modapp
+                        else:
+                            flask_routes[k] = modapp
                 elif hasattr(mod, 'bp'):
                     blueprint_routes.append(BlueprintRoute(k, getattr(mod, 'bp')))
                 else:
                     raise Exception(f"webrouter: cannot register route to plugin '{plugin}' since it neither specifies a 'create_app' function, a Flask app 'app' nor a Blueprint 'bp' nor is a Blueprint name configured!")
 
+        @app.on_event("startup")
+        async def initialize():
+            async with AsyncExitStack() as stack:
+                for route in app.routes:
+                    if isinstance(route, Mount) and isinstance(route.app, FastAPI):
+                        # Initialize app
+                        await stack.enter_async_context(
+                            route.app.router.lifespan_context(route.app), # noqa
+                        )
+
+        for k,v in routes.items():
+            app.mount(k, v)
+
+        if (blueprint_routes or flask_routes) and not flask_app:
+            flask_app = Flask(__name__)
+
         for r in blueprint_routes:
-            app.register_blueprint(r.blueprint, url_prefix=r.url_prefix)
+            flask_app.register_blueprint(r.blueprint, url_prefix=r.url_prefix)
 
-        app.wsgi_app = DispatcherMiddleware(app.wsgi_app, routes)
+        if flask_app:
+            flask_app.wsgi_app = DispatcherMiddleware(flask_app.wsgi_app, flask_routes)
+            app.mount("/", WSGIMiddleware(flask_app))
 
-        app.run(
+        import uvicorn
+
+        uvicorn.run(app,
             host=self.config['host'].as_str(),
             port=self.config['port'].get(int),
-            debug=opts.debug,
-            threaded=True,
+            log_level=opts.debug and 'debug' or 'info',
         )
 
-    def _configure_app(self, app, cfg, lib):
+    def _configure_fastapi_app(self, app, cfg, lib):
+        for k,v in cfg:
+            app.state[k] = v.get()
+
+        app.state.lib = lib
+
+        # TODO: support cors and running behind a reverse-proxy
+
+    def _configure_flask_app(self, app, cfg, lib):
         app.config['lib'] = lib
         app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
         app.config['INCLUDE_PATHS'] = self.config['include_paths']

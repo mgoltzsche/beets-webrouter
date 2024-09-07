@@ -5,7 +5,7 @@ with open('README.md', 'r') as fh:
 
 setuptools.setup(
     name='beets-webrouter',
-    version='0.0.0-dev',
+    version='0.5.0',
     author='Max Goltzsche',
     description='Serve multiple beets APIs on the same IP/port using a single command',
     long_description=long_description,
